@@ -1,0 +1,12 @@
+C:\Users\DELL\source\repos\gameco\gameco\bin\Debug\gameco.exe.config
+C:\Users\DELL\source\repos\gameco\gameco\bin\Debug\gameco.exe
+C:\Users\DELL\source\repos\gameco\gameco\bin\Debug\gameco.pdb
+C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.csproj.AssemblyReference.cache
+C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.Properties.Resources.resources
+C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.csproj.GenerateResource.cache
+C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.csproj.CoreCompileInputs.cache
+C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.exe
+C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.pdb
+C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.Form1.resources
+C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.Form2.resources
+C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.Form3.resources

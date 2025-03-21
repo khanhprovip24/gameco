@@ -1,0 +1,326 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace gameco
+{
+	public partial class Form1 : Form
+	{
+		private const int CELL_SIZE = 100;
+		private const int BOARD_SIZE = 5;
+		private int BOARD_PIXEL = CELL_SIZE * (BOARD_SIZE - 1);
+		private Button[,] boardButtons = new Button[BOARD_SIZE, BOARD_SIZE];
+		private chess[,] boardPieces = new chess[BOARD_SIZE, BOARD_SIZE];
+		private chess selectedChess = null;
+		private bool isBlueTurn = true; // Biến theo dõi lượt hiện tại
+
+		public Form1()
+		{
+			InitializeComponent();
+			this.Width = BOARD_PIXEL + 200;
+			this.Height = BOARD_PIXEL + 100;
+
+			InitializeBoard();
+			this.Paint += new PaintEventHandler(this.Form1_Paint);
+		}
+
+		private void InitializeBoard()
+		{
+			for (int i = 0; i < BOARD_SIZE; i++)
+			{
+				for (int j = 0; j < BOARD_SIZE; j++)
+				{
+					Button btn = new Button();
+					btn.Size = new Size(20, 20);
+					btn.Location = new Point(10 + i * CELL_SIZE - 10, 10 + j * CELL_SIZE - 10);
+					btn.Tag = new Point(i, j);
+					btn.BackColor = Color.White;
+					btn.FlatStyle = FlatStyle.Flat;
+					btn.Paint += new PaintEventHandler(this.Button_Paint);
+					btn.Click += new EventHandler(Button_Click);
+
+					boardButtons[i, j] = btn;
+					this.Controls.Add(btn);
+				}
+			}
+		}
+
+		private void UpdateTurnButton()
+		{
+			if (isBlueTurn)
+			{
+				turn.BackColor = Color.Blue;
+				timer1.Start();
+				timer2.Stop();
+
+			}
+			else
+			{
+				turn.BackColor = Color.Red;
+				timer1.Stop();
+				timer2.Start();
+			}
+		}
+
+		private void Button_Click(object sender, EventArgs e)
+		{
+			Button clickedButton = sender as Button;
+			Point position = (Point)clickedButton.Tag;
+			int x = position.X;
+			int y = position.Y;
+
+			// Kiểm tra lượt hiện tại
+			if ((isBlueTurn && clickedButton.BackColor == Color.Red) || (!isBlueTurn && clickedButton.BackColor == Color.Blue))
+			{
+				MessageBox.Show("Không phải lượt của bạn!");
+				return;
+			}
+
+			if (clickedButton.BackColor == Color.Red || clickedButton.BackColor == Color.Blue)
+			{
+				selectedChess = new chess(x, y, clickedButton.BackColor);
+				ClearHighlightedMoves();
+				ShowValidMoves(x, y);
+			}
+			else if (clickedButton.BackColor == Color.LightGreen && selectedChess != null)
+			{
+				MovePiece(selectedChess.X, selectedChess.Y, x, y);
+				selectedChess = null;
+				isBlueTurn = !isBlueTurn; // Chuyển lượt sau khi di chuyển quân cờ
+				UpdateTurnButton(); // Cập nhật màu của button hiển thị lượt
+			}
+		}
+
+		private void ShowValidMoves(int x, int y)
+		{
+			List<Point> restrictedPoints = new List<Point>
+			{
+				new Point(0, 1), new Point(0, 3),
+				new Point(1, 0), new Point(1, 2), new Point(1, 4),
+				new Point(2, 1), new Point(2, 3),
+				new Point(3, 0), new Point(3, 2), new Point(3, 4),
+				new Point(4, 1), new Point(4, 3)
+			};
+
+			int[,] directionsStraight = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
+			int[,] directionsDiagonal = { { 1, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 } };
+
+			bool isRestricted = restrictedPoints.Contains(new Point(x, y));
+
+			int[,] directions;
+			if (isRestricted)
+			{
+				directions = directionsStraight;
+			}
+			else
+			{
+				directions = new int[directionsStraight.GetLength(0) + directionsDiagonal.GetLength(0), 2];
+				Array.Copy(directionsStraight, 0, directions, 0, directionsStraight.Length);
+				Array.Copy(directionsDiagonal, 0, directions, directionsStraight.Length, directionsDiagonal.Length);
+			}
+
+			for (int i = 0; i < directions.GetLength(0); i++)
+			{
+				int newX = x + directions[i, 0];
+				int newY = y + directions[i, 1];
+
+				if (IsValidMove(newX, newY))
+				{
+					boardButtons[newX, newY].BackColor = Color.LightGreen;
+				}
+			}
+		}
+
+		private void MovePiece(int oldX, int oldY, int newX, int newY)
+		{
+			boardButtons[newX, newY].BackColor = boardButtons[oldX, oldY].BackColor;
+			boardButtons[oldX, oldY].BackColor = Color.White;
+
+			if (boardPieces[oldX, oldY] != null)
+			{
+				boardPieces[oldX, oldY].Move(newX, newY, boardPieces);
+			}
+
+			ClearHighlightedMoves();
+		}
+
+		private void ClearHighlightedMoves()
+		{
+			for (int i = 0; i < BOARD_SIZE; i++)
+			{
+				for (int j = 0; j < BOARD_SIZE; j++)
+				{
+					if (boardButtons[i, j].BackColor == Color.LightGreen)
+					{
+						boardButtons[i, j].BackColor = Color.White;
+					}
+				}
+			}
+		}
+
+		private bool IsValidMove(int x, int y)
+		{
+			return x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE &&
+				   boardButtons[x, y].BackColor == Color.White;
+		}
+
+		private void Button_Paint(object sender, PaintEventArgs e)
+		{
+			Button btn = sender as Button;
+			Graphics g = e.Graphics;
+			g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+			g.Clear(btn.BackColor);
+			using (Brush brush = new SolidBrush(btn.BackColor))
+			{
+				g.FillEllipse(brush, 0, 0, btn.Width, btn.Height);
+			}
+			using (Pen pen = new Pen(btn.ForeColor))
+			{
+				g.DrawEllipse(pen, 0, 0, btn.Width - 1, btn.Height - 1);
+			}
+		}
+
+		private void ResetPieces()
+		{
+			for (int i = 0; i < BOARD_SIZE; i++)
+			{
+				for (int j = 0; j < BOARD_SIZE; j++)
+				{
+					boardButtons[i, j].BackColor = Color.White;
+					boardPieces[i, j] = null;
+				}
+			}
+
+			for (int i = 0; i < BOARD_SIZE; i++)
+			{
+				boardButtons[i, 4].BackColor = Color.Blue;
+				boardPieces[i, 4] = new chess(i, 4, Color.Blue);
+			}
+			boardButtons[0, 3].BackColor = Color.Blue;
+			boardPieces[0, 3] = new chess(0, 3, Color.Blue);
+			boardButtons[4, 3].BackColor = Color.Blue;
+			boardPieces[4, 3] = new chess(4, 3, Color.Blue);
+			boardButtons[4, 2].BackColor = Color.Blue;
+			boardPieces[4, 2] = new chess(4, 2, Color.Blue);
+
+			for (int i = 0; i < BOARD_SIZE; i++)
+			{
+				boardButtons[i, 0].BackColor = Color.Red;
+				boardPieces[i, 0] = new chess(i, 0, Color.Red);
+			}
+			boardButtons[0, 1].BackColor = Color.Red;
+			boardPieces[0, 1] = new chess(0, 1, Color.Red);
+			boardButtons[4, 1].BackColor = Color.Red;
+			boardPieces[4, 1] = new chess(4, 1, Color.Red);
+			boardButtons[0, 2].BackColor = Color.Red;
+			boardPieces[0, 2] = new chess(0, 2, Color.Red);
+		}
+
+		private void Form1_Paint(object sender, PaintEventArgs e)
+		{
+			Graphics g = e.Graphics;
+			Pen blackPen = new Pen(Color.Black, 2);
+
+			for (int i = 0; i < BOARD_SIZE; i++)
+			{
+				g.DrawLine(blackPen, 10, 10 + i * CELL_SIZE, 10 + BOARD_PIXEL, 10 + i * CELL_SIZE);
+				g.DrawLine(blackPen, 10 + i * CELL_SIZE, 10, 10 + i * CELL_SIZE, 10 + BOARD_PIXEL);
+			}
+
+			g.DrawLine(blackPen, 10, 10, 10 + BOARD_PIXEL, 10 + BOARD_PIXEL);
+			g.DrawLine(blackPen, 10 + BOARD_PIXEL, 10, 10, 10 + BOARD_PIXEL);
+
+			g.DrawLine(blackPen, 10, 10 + 2 * CELL_SIZE, 10 + 2 * CELL_SIZE, 10);
+			g.DrawLine(blackPen, 10 + BOARD_PIXEL, 10 + 2 * CELL_SIZE, 10 + 2 * CELL_SIZE, 10);
+			g.DrawLine(blackPen, 10, 10 + 2 * CELL_SIZE, 10 + 2 * CELL_SIZE, 10 + BOARD_PIXEL);
+			g.DrawLine(blackPen, 10 + BOARD_PIXEL, 10 + 2 * CELL_SIZE, 10 + 2 * CELL_SIZE, 10 + BOARD_PIXEL);
+		}
+
+		private void button1_Click(object sender, EventArgs e)
+		{
+			ResetPieces();
+			s1 = 0;
+			m1 = 5;
+			s2 = 0;
+			m2 = 5;
+			minute1.Text = m1.ToString("D2");
+			second1.Text = s1.ToString("D2");
+			minute2.Text = m2.ToString("D2");
+			second2.Text = s2.ToString("D2");
+		}
+
+		private void button2_Click(object sender, EventArgs e)
+		{
+			DialogResult result = MessageBox.Show("Bạn đã thắng bạn có muốn chơi lại không?", "Xác nhận thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+			if (result == DialogResult.Yes)
+			{
+				Form2 form2 = new Form2();
+				form2.Show();
+				this.Hide();
+			}
+		}
+
+		private void Form1_Load(object sender, EventArgs e)
+		{
+			ResetPieces();
+			turn.BackColor = Color.Blue;
+		}
+
+		private void label1_Click(object sender, EventArgs e)
+		{
+
+		}
+
+		int m1 = 5,m2=5;
+		int s1 = 0,s2=0;
+		private void timer1_Tick(object sender, EventArgs e)
+		{
+			if (s1 == 0)
+			{
+				if (m1 == 0)
+				{
+					timer1.Stop();
+					MessageBox.Show("Hết giờ cho người chơi xanh!");
+					return;
+				}
+				m1--;
+				s1 = 59;
+			}
+			else
+			{
+				s1--;
+			}
+
+			minute1.Text = m1.ToString("D2");
+			second1.Text = s1.ToString("D2");
+		}
+
+		private void second_Click(object sender, EventArgs e)
+		{
+
+		}
+
+		private void timer2_Tick(object sender, EventArgs e)
+		{
+			if (s2 == 0)
+			{
+				if (m2 == 0)
+				{
+					timer2.Stop();
+					MessageBox.Show("Hết giờ cho người chơi đỏ!");
+					return;
+				}
+				m2--;
+				s2 = 59;
+			}
+			else
+			{
+				s2--;
+			}
+
+			minute2.Text = m2.ToString("D2");
+			second2.Text = s2.ToString("D2");
+		}
+	}
+}
