@@ -10,7 +10,7 @@ namespace gameco
 		private const int CELL_SIZE = 100;
 		private const int BOARD_SIZE = 5;
 		private int BOARD_PIXEL = CELL_SIZE * (BOARD_SIZE - 1);
-		private Button[,] boardButtons = new Button[BOARD_SIZE, BOARD_SIZE];
+		internal static Button[,] boardButtons = new Button[BOARD_SIZE, BOARD_SIZE]; // Change to internal
 		private chess[,] boardPieces = new chess[BOARD_SIZE, BOARD_SIZE];
 		private chess selectedChess = null;
 		private bool isBlueTurn = true; // Biến theo dõi lượt hiện tại
@@ -139,11 +139,22 @@ namespace gameco
 
 			if (boardPieces[oldX, oldY] != null)
 			{
-				boardPieces[oldX, oldY].Move(newX, newY, boardPieces);
+				boardPieces[newX, newY] = boardPieces[oldX, oldY];
+				boardPieces[oldX, oldY] = null;
+				boardPieces[newX, newY].Move(newX, newY, boardPieces);
+				boardPieces[newX, newY].Capture(newX, newY, boardPieces); // Gọi Capture
 			}
+
+			boardPieces[newX, newY].CaptureSurroundedPieces(boardPieces); // Gọi CaptureSurroundedPieces
 
 			ClearHighlightedMoves();
 		}
+
+
+
+
+
+
 
 		private void ClearHighlightedMoves()
 		{
@@ -239,16 +250,23 @@ namespace gameco
 
 		private void button1_Click(object sender, EventArgs e)
 		{
-			ResetPieces();
-			s1 = 0;
-			m1 = 5;
-			s2 = 0;
-			m2 = 5;
-			minute1.Text = m1.ToString("D2");
-			second1.Text = s1.ToString("D2");
-			minute2.Text = m2.ToString("D2");
-			second2.Text = s2.ToString("D2");
+			DialogResult result = MessageBox.Show("Bạn muốn chơi lại không?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+			if (result == DialogResult.Yes)
+			{
+				ResetPieces();
+				s1 = 0;
+				m1 = 5;
+				s2 = 0;
+				m2 = 5;
+				minute1.Text = m1.ToString("D2");
+				second1.Text = s1.ToString("D2");
+				minute2.Text = m2.ToString("D2");
+				second2.Text = s2.ToString("D2");
+				turn.BackColor = Color.Blue;
+			}
 		}
+
+
 
 		private void button2_Click(object sender, EventArgs e)
 		{
@@ -263,8 +281,10 @@ namespace gameco
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
+
 			ResetPieces();
 			turn.BackColor = Color.Blue;
+			timer1.Start();
 		}
 
 		private void label1_Click(object sender, EventArgs e)

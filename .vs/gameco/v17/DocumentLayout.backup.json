@@ -3,28 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\DELL\\source\\repos\\gameco\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|c:\\users\\dell\\source\\repos\\gameco\\gameco\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|solutionrelative:gameco\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|c:\\users\\dell\\source\\repos\\gameco\\gameco\\chess.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|solutionrelative:gameco\\chess.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|solutionrelative:gameco\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\logic.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|solutionrelative:gameco\\logic.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|solutionrelative:gameco\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\chess.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|solutionrelative:gameco\\chess.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EE7314C4-E082-48D3-BD26-2243E88BAF2D}|gameco\\gameco.csproj|solutionrelative:gameco\\player.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -62,24 +50,25 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "logic.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\logic.cs",
-              "RelativeDocumentMoniker": "gameco\\logic.cs",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\logic.cs",
-              "RelativeToolTip": "gameco\\logic.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "chess.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\chess.cs",
+              "RelativeDocumentMoniker": "gameco\\chess.cs",
+              "ToolTip": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\chess.cs*",
+              "RelativeToolTip": "gameco\\chess.cs*",
+              "ViewState": "AgIAAJEAAAAAAAAAAAAAwK4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-16T16:49:34.862Z"
+              "WhenOpened": "2025-02-22T10:22:05.953Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Form1.cs [Design]",
               "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\Form1.cs",
               "RelativeDocumentMoniker": "gameco\\Form1.cs",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\Form1.cs [Design]",
-              "RelativeToolTip": "gameco\\Form1.cs [Design]",
+              "ToolTip": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\Form1.cs [Design]*",
+              "RelativeToolTip": "gameco\\Form1.cs [Design]*",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-22T09:04:02.135Z",
               "EditorCaption": " [Design]"
@@ -90,48 +79,12 @@
               "Title": "Form1.cs",
               "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\Form1.cs",
               "RelativeDocumentMoniker": "gameco\\Form1.cs",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\Form1.cs",
-              "RelativeToolTip": "gameco\\Form1.cs",
-              "ViewState": "AgIAAA0BAAAAAAAAAAAuwPkAAAAkAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\Form1.cs*",
+              "RelativeToolTip": "gameco\\Form1.cs*",
+              "ViewState": "AgIAAHwAAAAAAAAAAAAAwJcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-14T05:47:31.471Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\Program.cs",
-              "RelativeDocumentMoniker": "gameco\\Program.cs",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\Program.cs",
-              "RelativeToolTip": "gameco\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAATAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-14T12:28:10.932Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "chess.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\chess.cs",
-              "RelativeDocumentMoniker": "gameco\\chess.cs",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\chess.cs",
-              "RelativeToolTip": "gameco\\chess.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAiwE4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-22T10:22:05.953Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "player.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\player.cs",
-              "RelativeDocumentMoniker": "gameco\\player.cs",
-              "ToolTip": "C:\\Users\\DELL\\source\\repos\\gameco\\gameco\\player.cs",
-              "RelativeToolTip": "gameco\\player.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAiAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-22T10:21:34.228Z"
             }
           ]
         }

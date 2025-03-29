@@ -9,4 +9,3 @@ C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.exe
 C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.pdb
 C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.Form1.resources
 C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.Form2.resources
-C:\Users\DELL\source\repos\gameco\gameco\obj\Debug\gameco.Form3.resources
