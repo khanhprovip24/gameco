@@ -104,14 +104,13 @@ namespace gameco
 			{
 				for (int j = 0; j < 5; j++)
 				{
-					if (boardPieces[i, j] != null && !visited[i, j])
+					if (boardPieces[i, j] != null && boardPieces[i, j].Color != this.Color && !visited[i, j])
 					{
 						List<(int, int)> region = new List<(int, int)>();
 						Color enemyColor = boardPieces[i, j].Color;
 
 						if (IsSurrounded(boardPieces, i, j, enemyColor, visited, region))
 						{
-							// Nếu tất cả quân trong danh sách region bị bao vây, đổi màu tất cả chúng
 							foreach (var (px, py) in region)
 							{
 								boardPieces[px, py].Color = this.Color;
@@ -126,7 +125,24 @@ namespace gameco
 		// Kiểm tra xem một nhóm quân có bị bao vây hay không
 		private bool IsSurrounded(chess[,] board, int x, int y, Color enemyColor, bool[,] visited, List<(int, int)> region)
 		{
-			int[,] directions = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
+			// Các hướng bao gồm cả 4 hướng ngang dọc và 4 hướng chéo
+			int[,] directions = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 },  // ngang dọc
+                          { 1, 1 }, { 1, -1 }, { -1, -1 }, { -1, 1 } }; // chéo
+
+			// Kiểm tra các điểm đặc biệt, chỉ có 4 hướng ngang dọc
+			List<(int, int)> specialPoints = new List<(int, int)>
+	{
+		(0, 1), (0, 3), (1, 0), (1, 2), (1, 4),
+		(2, 1), (2, 3), (3, 0), (3, 2), (3, 4),
+		(4, 1), (4, 3)
+	};
+
+			// Nếu điểm (x, y) là một trong các điểm đặc biệt, chỉ sử dụng các hướng ngang dọc
+			if (specialPoints.Contains((x, y)))
+			{
+				directions = new int[,] { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } }; // chỉ có 4 hướng ngang dọc
+			}
+
 			Queue<(int, int)> queue = new Queue<(int, int)>();
 			queue.Enqueue((x, y));
 			region.Add((x, y));
@@ -137,23 +153,27 @@ namespace gameco
 			{
 				var (cx, cy) = queue.Dequeue();
 
+				// Kiểm tra các quân cờ đối thủ xung quanh
+				bool hasPath = false;
 				for (int i = 0; i < directions.GetLength(0); i++)
 				{
 					int nx = cx + directions[i, 0];
 					int ny = cy + directions[i, 1];
 
-					if (nx < 0 || nx >= 5 || ny < 0 || ny >= 5)
+					// Kiểm tra biên để tránh vượt quá phạm vi bàn cờ
+					if (nx < 0 || nx > 4 || ny < 0 || ny > 4)
 					{
-						surrounded = false;
-						continue;
+						continue; // Không kiểm tra ngoài phạm vi bàn cờ
 					}
 
+					// Nếu có ô trống cạnh quân cờ đối thủ, có thể di chuyển, quân cờ không bị vây
 					if (board[nx, ny] == null)
 					{
-						surrounded = false;
-						continue;
+						hasPath = true;
+						break;
 					}
 
+					// Nếu là quân đối thủ chưa kiểm tra, thêm vào danh sách
 					if (!visited[nx, ny] && board[nx, ny].Color == enemyColor)
 					{
 						visited[nx, ny] = true;
@@ -161,10 +181,17 @@ namespace gameco
 						region.Add((nx, ny));
 					}
 				}
+
+				// Nếu quân cờ không có lối đi hợp lệ thì sẽ bị bao vây
+				if (hasPath)
+				{
+					surrounded = false;
+				}
 			}
 
 			return surrounded;
 		}
+
 
 		private bool IsValidMove(int x, int y)
 		{

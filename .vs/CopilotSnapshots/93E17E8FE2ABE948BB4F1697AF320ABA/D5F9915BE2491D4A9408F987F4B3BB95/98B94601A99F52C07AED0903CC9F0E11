@@ -14,28 +14,15 @@ namespace gameco
 		private chess[,] boardPieces = new chess[BOARD_SIZE, BOARD_SIZE];
 		private chess selectedChess = null;
 		private bool isBlueTurn = true; // Biến theo dõi lượt hiện tại
-		private int gameMode;
-		private object bot;
-		public Form1(int difficultyLevel)
+
+		public Form1()
 		{
 			InitializeComponent();
 			this.Width = BOARD_PIXEL + 200;
 			this.Height = BOARD_PIXEL + 100;
-			gameMode = difficultyLevel;
+
 			InitializeBoard();
 			this.Paint += new PaintEventHandler(this.Form1_Paint);
-			if (gameMode == 1)
-			{
-				bot = new BotEasy(Color.Red);
-			}
-			else if (gameMode == 2)
-			{
-				bot = new BotNormal(Color.Red); // Giả sử BotNormal đã được định nghĩa
-			}
-			else if (gameMode == 3)
-			{
-				bot = new BotHard(Color.Red); // Giả sử BotHard đã được định nghĩa
-			}
 		}
 
 		private void InitializeBoard()
@@ -75,6 +62,7 @@ namespace gameco
 				timer2.Start();
 			}
 		}
+
 		private void Button_Click(object sender, EventArgs e)
 		{
 			Button clickedButton = sender as Button;
@@ -97,45 +85,12 @@ namespace gameco
 			}
 			else if (clickedButton.BackColor == Color.LightGreen && selectedChess != null)
 			{
-				// Người chơi thực hiện nước đi
 				MovePiece(selectedChess.X, selectedChess.Y, x, y);
 				selectedChess = null;
 				isBlueTurn = !isBlueTurn; // Chuyển lượt sau khi di chuyển quân cờ
 				UpdateTurnButton(); // Cập nhật màu của button hiển thị lượt
-
-				// Kiểm tra điều kiện thắng sau lượt của người chơi
-				CheckWinCondition();
-
-				// Nếu là lượt của bot, bot thực hiện nước đi
-				if (!isBlueTurn && gameMode > 0) // gameMode > 0 nghĩa là có bot
-				{
-					MakeBotMove(); // Bot thực hiện nước đi
-					isBlueTurn = !isBlueTurn; // Chuyển lượt lại cho người chơi
-					UpdateTurnButton(); // Cập nhật màu của button hiển thị lượt
-
-					// Kiểm tra điều kiện thắng sau lượt của bot
-					CheckWinCondition();
-				}
 			}
 		}
-
-
-		private void MakeBotMove()
-		{
-			if (bot is BotEasy botEasy)
-			{
-				botEasy.MakeMove(boardPieces, boardButtons); // Pass both boardPieces and boardButtons
-			}
-			else if (bot is BotNormal botNormal)
-			{
-				botNormal.MakeMove(boardPieces, boardButtons); // Pass both boardPieces and boardButtons
-			}
-			else if (bot is BotHard botHard)
-			{
-				botHard.MakeMove(boardButtons, boardPieces); // Pass both boardButtons and boardPieces
-			}
-		}
-
 
 		private void ShowValidMoves(int x, int y)
 		{
@@ -150,6 +105,7 @@ namespace gameco
 
 			int[,] directionsStraight = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
 			int[,] directionsDiagonal = { { 1, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 } };
+
 			bool isRestricted = restrictedPoints.Contains(new Point(x, y));
 
 			int[,] directions;
@@ -163,6 +119,7 @@ namespace gameco
 				Array.Copy(directionsStraight, 0, directions, 0, directionsStraight.Length);
 				Array.Copy(directionsDiagonal, 0, directions, directionsStraight.Length, directionsDiagonal.Length);
 			}
+
 			for (int i = 0; i < directions.GetLength(0); i++)
 			{
 				int newX = x + directions[i, 0];
@@ -187,8 +144,11 @@ namespace gameco
 				boardPieces[newX, newY].Move(newX, newY, boardPieces);
 				boardPieces[newX, newY].Capture(newX, newY, boardPieces); // Kiểm tra gánh
 			}
+
 			boardPieces[newX, newY].CaptureSurroundedPieces(boardPieces); // Kiểm tra vây quân
+
 			ClearHighlightedMoves();
+
 			// Check for win condition
 			CheckWinCondition();
 
@@ -198,6 +158,7 @@ namespace gameco
 		{
 			bool RedExists = false;
 			bool BlueExists = false;
+
 			// Duyệt hết bàn cờ
 			for (int i = 0; i < 5; i++)
 			{
@@ -212,6 +173,7 @@ namespace gameco
 					}
 				}
 			}
+
 			// Nếu 1 màu không còn, thì thông báo thắng
 			if (!RedExists)
 			{
@@ -231,9 +193,7 @@ namespace gameco
 				}
 				else
 				{
-					Form2 form2= new Form2();
-					form2.Show();
-					this.Close(); // Đóng form hiện tại
+					Application.Exit(); // Thoát ứng dụng nếu chọn "No"
 				}
 			}
 			else if (!BlueExists)
@@ -254,13 +214,16 @@ namespace gameco
 				}
 				else
 				{
-					Form2 form2 = new Form2();
-					form2.Show();
-					this.Close(); // Đóng form hiện tại
+					Application.Exit(); // Thoát ứng dụng nếu chọn "No"
 				}
 			}
 
 		}
+
+
+
+
+
 
 		private void ClearHighlightedMoves()
 		{
@@ -318,8 +281,8 @@ namespace gameco
 			boardPieces[0, 3] = new chess(0, 3, Color.Blue);
 			boardButtons[4, 3].BackColor = Color.Blue;
 			boardPieces[4, 3] = new chess(4, 3, Color.Blue);
-			boardButtons[4, 2].BackColor = Color.Red;
-			boardPieces[4, 2] = new chess(4, 2, Color.Red);
+			boardButtons[4, 2].BackColor = Color.Blue;
+			boardPieces[4, 2] = new chess(4, 2, Color.Blue);
 
 			for (int i = 0; i < BOARD_SIZE; i++)
 			{
@@ -330,8 +293,8 @@ namespace gameco
 			boardPieces[0, 1] = new chess(0, 1, Color.Red);
 			boardButtons[4, 1].BackColor = Color.Red;
 			boardPieces[4, 1] = new chess(4, 1, Color.Red);
-			boardButtons[0, 2].BackColor = Color.Blue;
-			boardPieces[0, 2] = new chess(0, 2, Color.Blue);
+			boardButtons[0, 2].BackColor = Color.Red;
+			boardPieces[0, 2] = new chess(0, 2, Color.Red);
 		}
 
 		private void Form1_Paint(object sender, PaintEventArgs e)
@@ -353,6 +316,7 @@ namespace gameco
 			g.DrawLine(blackPen, 10, 10 + 2 * CELL_SIZE, 10 + 2 * CELL_SIZE, 10 + BOARD_PIXEL);
 			g.DrawLine(blackPen, 10 + BOARD_PIXEL, 10 + 2 * CELL_SIZE, 10 + 2 * CELL_SIZE, 10 + BOARD_PIXEL);
 		}
+
 		private void button1_Click(object sender, EventArgs e)
 		{
 			DialogResult result = MessageBox.Show("Bạn muốn chơi lại không?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -369,38 +333,36 @@ namespace gameco
 				second2.Text = s2.ToString("D2");
 				turn.BackColor = Color.Blue;
 			}
-			else
-			{
-			Form2 form2 = new Form2();
-				form2.Show();
-				this.Close(); // Đóng form hiện tại
-			}
 		}
+
 
 
 		private void button2_Click(object sender, EventArgs e)
 		{
-			DialogResult result = MessageBox.Show("Bạn đã thắng bạn có muốn thoát không?", "Xác nhận thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+			DialogResult result = MessageBox.Show("Bạn đã thắng bạn có muốn chơi lại không?", "Xác nhận thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 			if (result == DialogResult.Yes)
 			{
 				Form2 form2 = new Form2();
 				form2.Show();
-				this.Close();
+				this.Hide();
 			}
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
+
 			ResetPieces();
 			turn.BackColor = Color.Blue;
 			timer1.Start();
 		}
+
 		private void label1_Click(object sender, EventArgs e)
 		{
 
 		}
-		int m1 = 5, m2 = 5;
-		int s1 = 0, s2 = 0;
+
+		int m1 = 5,m2=5;
+		int s1 = 0,s2=0;
 		private void timer1_Tick(object sender, EventArgs e)
 		{
 			if (s1 == 0)
@@ -486,7 +448,7 @@ namespace gameco
 			minute2.Text = m2.ToString("D2");
 			second2.Text = s2.ToString("D2");
 		}
-
+		
 
 	}
 }

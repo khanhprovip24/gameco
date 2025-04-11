@@ -38,7 +38,7 @@ namespace gameco
 
 		private void button1_Click(object sender, EventArgs e)
 		{
-			Form1 form1 = new Form1();
+			Form1 form1 = new Form1(0);
 			form1.Show();
 			this.Hide();
 		}
@@ -46,7 +46,9 @@ namespace gameco
 
 		private void button2_Click(object sender, EventArgs e)
 		{
-
+			 Form3 form3 = new Form3();
+			form3.Show();
+		   
 		}
 
 		private void button4_Click(object sender, EventArgs e)

@@ -1,0 +1,115 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+
+namespace gameco
+{
+	public class Bot
+	{
+		private Random random = new Random();
+
+		// Mức độ dễ: Chọn nước đi ngẫu nhiên
+		public (int, int, int, int) GetEasyMove(chess[,] boardPieces, Color botColor)
+		{
+			List<(int, int, int, int)> validMoves = GetAllValidMoves(boardPieces, botColor);
+			if (validMoves.Count > 0)
+			{
+				return validMoves[random.Next(validMoves.Count)];
+			}
+			return (-1, -1, -1, -1); // Không có nước đi hợp lệ
+		}
+
+		// Mức độ khó: Chọn nước đi chiến lược
+		public (int, int, int, int) GetHardMove(chess[,] boardPieces, Color botColor)
+		{
+			List<(int, int, int, int)> validMoves = GetAllValidMoves(boardPieces, botColor);
+
+			// Chiến lược: Ưu tiên nước đi bao vây quân đối thủ
+			foreach (var move in validMoves)
+			{
+				int oldX = move.Item1, oldY = move.Item2, newX = move.Item3, newY = move.Item4;
+				if (WouldCaptureOpponent(boardPieces, oldX, oldY, newX, newY, botColor))
+				{
+					return move;
+				}
+			}
+
+			// Nếu không có nước đi chiến lược, chọn ngẫu nhiên
+			if (validMoves.Count > 0)
+			{
+				return validMoves[random.Next(validMoves.Count)];
+			}
+			return (-1, -1, -1, -1); // Không có nước đi hợp lệ
+		}
+
+		// Lấy tất cả các nước đi hợp lệ
+		private List<(int, int, int, int)> GetAllValidMoves(chess[,] boardPieces, Color botColor)
+		{
+			List<(int, int, int, int)> validMoves = new List<(int, int, int, int)>();
+
+			for (int i = 0; i < boardPieces.GetLength(0); i++)
+			{
+				for (int j = 0; j < boardPieces.GetLength(1); j++)
+				{
+					if (boardPieces[i, j] != null && boardPieces[i, j].Color == botColor)
+					{
+						List<(int, int)> moves = GetValidMoves(boardPieces, i, j);
+						foreach (var move in moves)
+						{
+							validMoves.Add((i, j, move.Item1, move.Item2));
+						}
+					}
+				}
+			}
+
+			return validMoves;
+		}
+
+		// Kiểm tra các nước đi hợp lệ cho một quân cờ
+		private List<(int, int)> GetValidMoves(chess[,] boardPieces, int x, int y)
+		{
+			List<(int, int)> validMoves = new List<(int, int)>();
+			int[,] directions = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
+
+			for (int i = 0; i < directions.GetLength(0); i++)
+			{
+				int newX = x + directions[i, 0];
+				int newY = y + directions[i, 1];
+
+				if (newX >= 0 && newX < 5 && newY >= 0 && newY < 5 && boardPieces[newX, newY] == null)
+				{
+					validMoves.Add((newX, newY));
+				}
+			}
+
+			return validMoves;
+		}
+
+		// Kiểm tra xem nước đi có bao vây quân đối thủ không
+		private bool WouldCaptureOpponent(chess[,] boardPieces, int oldX, int oldY, int newX, int newY, Color botColor)
+		{
+			// Giả lập nước đi
+			chess[,] simulatedBoard = (chess[,])boardPieces.Clone();
+			simulatedBoard[newX, newY] = simulatedBoard[oldX, oldY];
+			simulatedBoard[oldX, oldY] = null;
+
+			// Kiểm tra bao vây
+			chess botChess = simulatedBoard[newX, newY];
+			botChess.Capture(newX, newY, simulatedBoard);
+
+			// Nếu có quân đối thủ bị bao vây, trả về true
+			for (int i = 0; i < simulatedBoard.GetLength(0); i++)
+			{
+				for (int j = 0; j < simulatedBoard.GetLength(1); j++)
+				{
+					if (simulatedBoard[i, j] != null && simulatedBoard[i, j].Color != botColor)
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+	}
+}
