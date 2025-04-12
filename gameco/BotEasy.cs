@@ -66,7 +66,9 @@ namespace gameco
 		{
 			// Cập nhật trạng thái của Button
 			boardButtons[newX, newY].BackColor = boardButtons[oldX, oldY].BackColor;
+			boardButtons[newX, newY].Visible = true; // Hiển thị ô mới sau khi di chuyển
 			boardButtons[oldX, oldY].BackColor = Color.White;
+			boardButtons[oldX, oldY].Visible = false; // Ẩn ô cũ sau khi di chuyển
 
 			// Cập nhật trạng thái của chess
 			if (boardPieces[oldX, oldY] != null)
@@ -85,20 +87,23 @@ namespace gameco
 
 			// Các hướng đi hợp lệ (trái, phải, lên, xuống, chéo)
 			int[,] directions = {
-				{ 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 },
-				{ 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 }
+				{ 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 }, // Dọc và ngang
+				{ 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } // Chéo
 			};
 
-			List<(int, int)> specialPoints = new List<(int, int)>
+			// Các điểm đặc biệt chỉ được đi dọc và ngang
+			List<Point> specialPoints = new List<Point>
 			{
-				(0, 1), (0, 3), (1, 0), (1, 2), (1, 4),
-				(2, 1), (2, 3), (3, 0), (3, 2), (3, 4),
-				(4, 1), (4, 3)
+				new Point(0, 1), new Point(0, 3),
+				new Point(1, 0), new Point(1, 2), new Point(1, 4),
+				new Point(2, 1), new Point(2, 3),
+				new Point(3, 0), new Point(3, 2), new Point(3, 4),
+				new Point(4, 1), new Point(4, 3)
 			};
 
-			// Nếu ở điểm đặc biệt => chỉ được đi ngang dọc
-			bool isSpecial = specialPoints.Contains((piece.X, piece.Y));
-			int limit = isSpecial ? 4 : 8;
+			// Kiểm tra xem quân cờ có ở điểm đặc biệt không
+			bool isSpecialPoint = specialPoints.Contains(new Point(piece.X, piece.Y));
+			int limit = isSpecialPoint ? 4 : 8; // Nếu ở điểm đặc biệt, chỉ duyệt 4 hướng (dọc và ngang)
 
 			for (int i = 0; i < limit; i++)
 			{

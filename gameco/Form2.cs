@@ -63,5 +63,9 @@ namespace gameco
 			MessageBox.Show(gameRules, "Luật chơi", MessageBoxButtons.OK, MessageBoxIcon.Information);
 		}
 
+		private void Form2_Load(object sender, EventArgs e)
+		{
+
+		}
 	}
 }

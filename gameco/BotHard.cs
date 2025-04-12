@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+
 namespace gameco
 {
 	public class BotHard
@@ -14,7 +15,7 @@ namespace gameco
 			botColor = color;
 		}
 
-		public void MakeMove(System.Windows.Forms.Button[,] boardButtons, chess[,] boardPieces)
+		public void MakeMove(chess[,] boardPieces, Button[,] boardButtons)
 		{
 			List<chess> botPieces = new List<chess>();
 
@@ -34,38 +35,48 @@ namespace gameco
 			if (botPieces.Count == 0)
 				return;
 
-			while (botPieces.Count > 0)
+			List<(chess, (int, int))> bestMoves = new List<(chess, (int, int))>();
+			List<(chess, (int, int))> normalMoves = new List<(chess, (int, int))>();
+
+			foreach (var piece in botPieces)
 			{
-				// 2. Chọn 1 quân cờ ngẫu nhiên
-				int randomIndex = random.Next(botPieces.Count);
-				chess selected = botPieces[randomIndex];
+				List<(int, int)> validMoves = GetValidMoves(piece, boardPieces);
 
-				// 3. Tìm các nước đi hợp lệ
-				List<(int, int)> validMoves = GetValidMoves(selected, boardPieces);
-
-				if (validMoves.Count > 0)
+				foreach (var move in validMoves)
 				{
-					// 4. Chọn 1 nước đi ngẫu nhiên
-					var (newX, newY) = validMoves[random.Next(validMoves.Count)];
-
-					// 5. Di chuyển quân cờ trên bàn cờ
-					MovePiece(selected.X, selected.Y, newX, newY, boardPieces, boardButtons);
-
-					break; // Đã đi 1 lần thì kết thúc lượt
-				}
-				else
-				{
-					// Nếu quân này không di chuyển được, bỏ và thử quân khác
-					botPieces.RemoveAt(randomIndex);
+					if (WouldCapture(piece.X, piece.Y, move.Item1, move.Item2, boardPieces))
+					{
+						bestMoves.Add((piece, move));
+					}
+					else
+					{
+						normalMoves.Add((piece, move));
+					}
 				}
 			}
+
+			if (bestMoves.Count > 0)
+			{
+				// Ưu tiên nước đi có thể ăn quân
+				var (selectedPiece, move) = bestMoves[random.Next(bestMoves.Count)];
+				MovePiece(selectedPiece.X, selectedPiece.Y, move.Item1, move.Item2, boardPieces, boardButtons);
+			}
+			else if (normalMoves.Count > 0)
+			{
+				// Nếu không ăn được ai, thì đi nước bình thường
+				var (selectedPiece, move) = normalMoves[random.Next(normalMoves.Count)];
+				MovePiece(selectedPiece.X, selectedPiece.Y, move.Item1, move.Item2, boardPieces, boardButtons);
+			}
+			// Nếu không có nước đi hợp lệ thì bỏ lượt
 		}
 
-		private void MovePiece(int oldX, int oldY, int newX, int newY, chess[,] boardPieces, System.Windows.Forms.Button[,] boardButtons)
+		private void MovePiece(int oldX, int oldY, int newX, int newY, chess[,] boardPieces, Button[,] boardButtons)
 		{
 			// Cập nhật trạng thái của Button
 			boardButtons[newX, newY].BackColor = boardButtons[oldX, oldY].BackColor;
+			boardButtons[newX, newY].Visible = true; // Hiển thị ô mới sau khi di chuyển
 			boardButtons[oldX, oldY].BackColor = Color.White;
+			boardButtons[oldX, oldY].Visible = false; // Ẩn ô cũ sau khi di chuyển
 
 			// Cập nhật trạng thái của chess
 			if (boardPieces[oldX, oldY] != null)
@@ -78,208 +89,28 @@ namespace gameco
 			}
 		}
 
-
-
-		private (int, int, chess) FindBestMove(chess[,] boardPieces)
-		{
-			int bestScore = int.MinValue;
-			(int bestX, int bestY) = (-1, -1);
-			chess bestPiece = null;
-
-			// Tìm tất cả quân cờ của bot
-			List<chess> botPieces = new List<chess>();
-			for (int i = 0; i < 5; i++)
-			{
-				for (int j = 0; j < 5; j++)
-				{
-					if (boardPieces[i, j] != null && boardPieces[i, j].Color == botColor)
-					{
-						botPieces.Add(boardPieces[i, j]);
-					}
-				}
-			}
-
-			// Duyệt qua tất cả các quân cờ và các nước đi hợp lệ
-			foreach (var piece in botPieces)
-			{
-				List<(int, int)> validMoves = GetValidMoves(piece, boardPieces);
-
-				foreach (var (newX, newY) in validMoves)
-				{
-					// Tạo bản sao bàn cờ để mô phỏng nước đi
-					chess[,] boardCopy = CloneBoard(boardPieces);
-					chess pieceCopy = boardCopy[piece.X, piece.Y];
-					pieceCopy.Move(newX, newY, boardCopy);
-
-					// Tính điểm của trạng thái bàn cờ sau nước đi
-					int score = Minimax(boardCopy, 3, false);
-
-					// Cập nhật nước đi tốt nhất
-					if (score > bestScore)
-					{
-						bestScore = score;
-						bestX = newX;
-						bestY = newY;
-						bestPiece = piece;
-					}
-				}
-			}
-
-			return (bestX, bestY, bestPiece);
-		}
-
-		private int Minimax(chess[,] board, int depth, bool isMaximizing)
-		{
-			// Điều kiện dừng: đạt độ sâu tối đa hoặc kết thúc trò chơi
-			if (depth == 0 || IsGameOver(board))
-			{
-				return EvaluateBoard(board);
-			}
-
-			if (isMaximizing)
-			{
-				int maxEval = int.MinValue;
-
-				// Tìm tất cả quân cờ của bot
-				List<chess> botPieces = GetPiecesByColor(board, botColor);
-
-				foreach (var piece in botPieces)
-				{
-					List<(int, int)> validMoves = GetValidMoves(piece, board);
-
-					foreach (var (newX, newY) in validMoves)
-					{
-						// Mô phỏng nước đi
-						chess[,] boardCopy = CloneBoard(board);
-						chess pieceCopy = boardCopy[piece.X, piece.Y];
-						pieceCopy.Move(newX, newY, boardCopy);
-
-						// Đệ quy Minimax
-						int eval = Minimax(boardCopy, depth - 1, false);
-						maxEval = Math.Max(maxEval, eval);
-					}
-				}
-
-				return maxEval;
-			}
-			else
-			{
-				int minEval = int.MaxValue;
-
-				// Tìm tất cả quân cờ của đối thủ
-				Color enemyColor = botColor == Color.White ? Color.Black : Color.White;
-				List<chess> enemyPieces = GetPiecesByColor(board, enemyColor);
-
-				foreach (var piece in enemyPieces)
-				{
-					List<(int, int)> validMoves = GetValidMoves(piece, board);
-
-					foreach (var (newX, newY) in validMoves)
-					{
-						// Mô phỏng nước đi
-						chess[,] boardCopy = CloneBoard(board);
-						chess pieceCopy = boardCopy[piece.X, piece.Y];
-						pieceCopy.Move(newX, newY, boardCopy);
-
-						// Đệ quy Minimax
-						int eval = Minimax(boardCopy, depth - 1, true);
-						minEval = Math.Min(minEval, eval);
-					}
-				}
-
-				return minEval;
-			}
-		}
-
-		private int EvaluateBoard(chess[,] board)
-		{
-			// Hàm đánh giá trạng thái bàn cờ (ví dụ: số lượng quân cờ)
-			int score = 0;
-
-			for (int i = 0; i < 5; i++)
-			{
-				for (int j = 0; j < 5; j++)
-				{
-					if (board[i, j] != null)
-					{
-						score += board[i, j].Color == botColor ? 1 : -1;
-					}
-				}
-			}
-
-			return score;
-		}
-
-		private bool IsGameOver(chess[,] board)
-		{
-			// Kiểm tra xem trò chơi đã kết thúc chưa (ví dụ: không còn quân cờ)
-			bool botHasPieces = false;
-			bool enemyHasPieces = false;
-
-			for (int i = 0; i < 5; i++)
-			{
-				for (int j = 0; j < 5; j++)
-				{
-					if (board[i, j] != null)
-					{
-						if (board[i, j].Color == botColor)
-							botHasPieces = true;
-						else
-							enemyHasPieces = true;
-					}
-				}
-			}
-
-			return !botHasPieces || !enemyHasPieces;
-		}
-
-		private List<chess> GetPiecesByColor(chess[,] board, Color color)
-		{
-			List<chess> pieces = new List<chess>();
-
-			for (int i = 0; i < 5; i++)
-			{
-				for (int j = 0; j < 5; j++)
-				{
-					if (board[i, j] != null && board[i, j].Color == color)
-					{
-						pieces.Add(board[i, j]);
-					}
-				}
-			}
-
-			return pieces;
-		}
-
-		private chess[,] CloneBoard(chess[,] board)
-		{
-			chess[,] clone = new chess[5, 5];
-
-			for (int i = 0; i < 5; i++)
-			{
-				for (int j = 0; j < 5; j++)
-				{
-					if (board[i, j] != null)
-					{
-						clone[i, j] = new chess(board[i, j].X, board[i, j].Y, board[i, j].Color);
-					}
-				}
-			}
-
-			return clone;
-		}
-
 		private List<(int, int)> GetValidMoves(chess piece, chess[,] boardPieces)
 		{
 			List<(int, int)> moves = new List<(int, int)>();
 
-			// Các hướng đi hợp lệ (trái, phải, lên, xuống, chéo)
 			int[,] directions = {
 				{ 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 },
 				{ 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 }
 			};
 
-			for (int i = 0; i < directions.GetLength(0); i++)
+			List<Point> specialPoints = new List<Point>
+			{
+				new Point(0, 1), new Point(0, 3),
+				new Point(1, 0), new Point(1, 2), new Point(1, 4),
+				new Point(2, 1), new Point(2, 3),
+				new Point(3, 0), new Point(3, 2), new Point(3, 4),
+				new Point(4, 1), new Point(4, 3)
+			};
+
+			bool isSpecialPoint = specialPoints.Contains(new Point(piece.X, piece.Y));
+			int limit = isSpecialPoint ? 4 : 8;
+
+			for (int i = 0; i < limit; i++)
 			{
 				int newX = piece.X + directions[i, 0];
 				int newY = piece.Y + directions[i, 1];
@@ -296,6 +127,51 @@ namespace gameco
 		private bool IsValidMove(int x, int y, chess[,] boardPieces)
 		{
 			return x >= 0 && x < 5 && y >= 0 && y < 5 && boardPieces[x, y] == null;
+		}
+
+		private bool WouldCapture(int oldX, int oldY, int newX, int newY, chess[,] boardPieces)
+		{
+			// Giả lập 1 nước đi để kiểm tra có ăn được quân không
+			chess[,] tempBoard = (chess[,])boardPieces.Clone();
+
+			// Di chuyển tạm thời
+			tempBoard[newX, newY] = tempBoard[oldX, oldY];
+			tempBoard[oldX, oldY] = null;
+
+			// Gọi hàm kiểm tra Capture tạm (giống logic Capture)
+			return CheckCapture(newX, newY, tempBoard);
+		}
+
+		private bool CheckCapture(int x, int y, chess[,] boardPieces)
+		{
+			Color myColor = boardPieces[x, y].Color;
+			Color enemyColor = myColor == Color.Red ? Color.Blue : Color.Red;
+
+			// Kiểm tra bị kẹp ngang hoặc dọc
+			int[,] directions = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
+
+			for (int i = 0; i < 4; i++)
+			{
+				int adjX = x + directions[i, 0];
+				int adjY = y + directions[i, 1];
+				int oppositeX = x + directions[i, 0] * 2;
+				int oppositeY = y + directions[i, 1] * 2;
+
+				if (adjX >= 0 && adjX < 5 && adjY >= 0 && adjY < 5 &&
+					oppositeX >= 0 && oppositeX < 5 && oppositeY >= 0 && oppositeY < 5)
+				{
+					if (boardPieces[adjX, adjY] != null && boardPieces[oppositeX, oppositeY] != null)
+					{
+						if (boardPieces[adjX, adjY].Color == enemyColor && boardPieces[oppositeX, oppositeY].Color == myColor)
+						{
+							// Kẹp 2 bên, ăn được
+							return true;
+						}
+					}
+				}
+			}
+
+			return false;
 		}
 	}
 }

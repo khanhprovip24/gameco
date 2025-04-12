@@ -70,7 +70,9 @@ namespace gameco
 		{
 			// Cập nhật trạng thái của Button
 			boardButtons[newX, newY].BackColor = boardButtons[oldX, oldY].BackColor;
+			boardButtons[newX, newY].Visible = true; // Hiển thị ô mới sau khi di chuyển
 			boardButtons[oldX, oldY].BackColor = Color.White;
+			boardButtons[oldX, oldY].Visible = false; // Ẩn ô cũ sau khi di chuyển
 
 			// Cập nhật trạng thái của chess
 			if (boardPieces[oldX, oldY] != null)
@@ -83,26 +85,79 @@ namespace gameco
 			}
 		}
 
+		private int EvaluateMove(chess piece, int newX, int newY, chess[,] boardPieces)
+		{
+			int score = 0;
+
+			// 1. Ưu tiên nước đi có thể ăn quân đối phương
+			if (boardPieces[newX, newY] != null && boardPieces[newX, newY].Color != botColor)
+			{
+				score += 20; // Điểm cao hơn nếu ăn được quân đối phương
+			}
+
+			// 2. Tránh nước đi dẫn đến bị ăn
+			if (IsMoveDangerous(newX, newY, boardPieces))
+			{
+				score -= 15; // Trừ điểm nếu nước đi có thể bị ăn
+			}
+
+			// 3. Ưu tiên nước đi gần trung tâm bàn cờ
+			int centerX = 2, centerY = 2;
+			score += 5 - (Math.Abs(newX - centerX) + Math.Abs(newY - centerY));
+
+			return score;
+		}
+
+		private bool IsMoveDangerous(int x, int y, chess[,] boardPieces)
+		{
+			Color enemyColor = botColor == Color.White ? Color.Black : Color.White;
+
+			// Kiểm tra các ô xung quanh xem có quân đối phương không
+			int[,] directions = {
+				{ 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 },
+				{ 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 }
+			};
+
+			for (int i = 0; i < directions.GetLength(0); i++)
+			{
+				int newX = x + directions[i, 0];
+				int newY = y + directions[i, 1];
+
+				if (newX >= 0 && newX < 5 && newY >= 0 && newY < 5)
+				{
+					if (boardPieces[newX, newY] != null && boardPieces[newX, newY].Color == enemyColor)
+					{
+						return true; // Có nguy cơ bị ăn
+					}
+				}
+			}
+
+			return false;
+		}
+
 		private List<(int, int)> GetValidMoves(chess piece, chess[,] boardPieces)
 		{
 			List<(int, int)> moves = new List<(int, int)>();
 
 			// Các hướng đi hợp lệ (trái, phải, lên, xuống, chéo)
 			int[,] directions = {
-				{ 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 },
-				{ 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 }
+				{ 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 }, // Dọc và ngang
+				{ 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } // Chéo
 			};
 
-			List<(int, int)> specialPoints = new List<(int, int)>
+			// Các điểm đặc biệt chỉ được đi dọc và ngang
+			List<Point> specialPoints = new List<Point>
 			{
-				(0, 1), (0, 3), (1, 0), (1, 2), (1, 4),
-				(2, 1), (2, 3), (3, 0), (3, 2), (3, 4),
-				(4, 1), (4, 3)
+				new Point(0, 1), new Point(0, 3),
+				new Point(1, 0), new Point(1, 2), new Point(1, 4),
+				new Point(2, 1), new Point(2, 3),
+				new Point(3, 0), new Point(3, 2), new Point(3, 4),
+				new Point(4, 1), new Point(4, 3)
 			};
 
-			// Nếu ở điểm đặc biệt => chỉ được đi ngang dọc
-			bool isSpecial = specialPoints.Contains((piece.X, piece.Y));
-			int limit = isSpecial ? 4 : 8;
+			// Kiểm tra xem quân cờ có ở điểm đặc biệt không
+			bool isSpecialPoint = specialPoints.Contains(new Point(piece.X, piece.Y));
+			int limit = isSpecialPoint ? 4 : 8; // Nếu ở điểm đặc biệt, chỉ duyệt 4 hướng (dọc và ngang)
 
 			for (int i = 0; i < limit; i++)
 			{
@@ -122,54 +177,5 @@ namespace gameco
 		{
 			return x >= 0 && x < 5 && y >= 0 && y < 5 && boardPieces[x, y] == null;
 		}
-
-		private int EvaluateMove(chess piece, int newX, int newY, chess[,] boardPieces)
-		{
-			int score = 0;
-
-			// 1. Ưu tiên nước đi có thể ăn quân đối phương
-			if (boardPieces[newX, newY] != null && boardPieces[newX, newY].Color != botColor)
-			{
-				score += 10; // Điểm cao hơn nếu ăn được quân đối phương
-			}
-
-			// 2. Ưu tiên nước đi gần trung tâm bàn cờ
-			int centerX = 2, centerY = 2;
-			score += 5 - (Math.Abs(newX - centerX) + Math.Abs(newY - centerY));
-
-			// 3. Ưu tiên nước đi không để quân cờ bị bao vây
-			if (!IsSurrounded(newX, newY, boardPieces))
-			{
-				score += 5;
-			}
-
-			return score;
-		}
-
-		private bool IsSurrounded(int x, int y, chess[,] boardPieces)
-		{
-			// Kiểm tra xem quân cờ có bị bao vây bởi quân đối phương hay không
-			int[,] directions = {
-		{ 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 }
-	};
-
-			for (int i = 0; i < directions.GetLength(0); i++)
-			{
-				int newX = x + directions[i, 0];
-				int newY = y + directions[i, 1];
-
-				if (newX >= 0 && newX < 5 && newY >= 0 && newY < 5)
-				{
-					if (boardPieces[newX, newY] == null || boardPieces[newX, newY].Color == botColor)
-					{
-						return false; // Không bị bao vây nếu có ô trống hoặc quân cờ cùng màu
-					}
-				}
-			}
-
-			return true; // Bị bao vây
-		}
-
 	}
 }
-

@@ -16,6 +16,11 @@ namespace gameco
 		private bool isBlueTurn = true; // Biến theo dõi lượt hiện tại
 		private int gameMode;
 		private object bot;
+		private const int OFFSET = 20;
+		private int newCellSize = (int)(CELL_SIZE * SCALE_FACTOR);
+		private int newButtonSize = (int)(20 * SCALE_FACTOR);
+		private int newBoardPixel;
+		private const float SCALE_FACTOR = 1.15f;
 		public Form1(int difficultyLevel)
 		{
 			InitializeComponent();
@@ -30,11 +35,11 @@ namespace gameco
 			}
 			else if (gameMode == 2)
 			{
-				bot = new BotNormal(Color.Red); // Giả sử BotNormal đã được định nghĩa
+				bot = new BotNormal(Color.Red);
 			}
 			else if (gameMode == 3)
 			{
-				bot = new BotHard(Color.Red); // Giả sử BotHard đã được định nghĩa
+				bot = new BotHard(Color.Red); 
 			}
 		}
 
@@ -45,18 +50,66 @@ namespace gameco
 				for (int j = 0; j < BOARD_SIZE; j++)
 				{
 					Button btn = new Button();
-					btn.Size = new Size(20, 20);
-					btn.Location = new Point(10 + i * CELL_SIZE - 10, 10 + j * CELL_SIZE - 10);
+					btn.Size = new Size(newButtonSize, newButtonSize);
+					btn.Location = new Point(OFFSET + i * newCellSize - newButtonSize / 2, OFFSET + j * newCellSize - newButtonSize / 2);
 					btn.Tag = new Point(i, j);
 					btn.BackColor = Color.White;
 					btn.FlatStyle = FlatStyle.Flat;
 					btn.Paint += new PaintEventHandler(this.Button_Paint);
 					btn.Click += new EventHandler(Button_Click);
 
+					// Đặt tất cả các nút ban đầu là không hiển thị
+					btn.Visible = false;
+
 					boardButtons[i, j] = btn;
 					this.Controls.Add(btn);
 				}
 			}
+		}
+
+
+
+		private void Button_Paint(object sender, PaintEventArgs e)
+		{
+			Button btn = sender as Button;
+			Graphics g = e.Graphics;
+			g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+			g.Clear(btn.BackColor);
+
+			using (Brush brush = new SolidBrush(btn.BackColor))
+			{
+				g.FillEllipse(brush, 0, 0, btn.Width, btn.Height);
+			}
+			using (Pen pen = new Pen(btn.ForeColor))
+			{
+				g.DrawEllipse(pen, 0, 0, btn.Width - 1, btn.Height - 1);
+			}
+		}
+
+		private void Form1_Paint(object sender, PaintEventArgs e)
+		{
+			Graphics g = e.Graphics;
+			Pen blackPen = new Pen(Color.Black, 2);
+
+			// Tăng kích thước CELL_SIZE lên 15% để vẽ lại bàn cờ
+			int newCellSize = (int)(CELL_SIZE * 1.15);
+			int newBoardPixel = newCellSize * (BOARD_SIZE - 1);
+
+			for (int i = 0; i < BOARD_SIZE; i++)
+			{
+				g.DrawLine(blackPen, OFFSET, OFFSET + i * newCellSize, OFFSET + newBoardPixel, OFFSET + i * newCellSize);
+				g.DrawLine(blackPen, OFFSET + i * newCellSize, OFFSET, OFFSET + i * newCellSize, OFFSET + newBoardPixel);
+
+			}
+
+			g.DrawLine(blackPen, OFFSET, OFFSET, OFFSET + newBoardPixel, OFFSET + newBoardPixel);
+			g.DrawLine(blackPen, OFFSET + newBoardPixel, OFFSET, OFFSET, OFFSET + newBoardPixel);
+
+			g.DrawLine(blackPen, OFFSET, OFFSET + 2 * newCellSize, OFFSET + 2 * newCellSize, OFFSET);
+			g.DrawLine(blackPen, OFFSET + newBoardPixel, OFFSET + 2 * newCellSize, OFFSET + 2 * newCellSize, OFFSET);
+			g.DrawLine(blackPen, OFFSET, OFFSET + 2 * newCellSize, OFFSET + 2 * newCellSize, OFFSET + newBoardPixel);
+			g.DrawLine(blackPen, OFFSET + newBoardPixel, OFFSET + 2 * newCellSize, OFFSET + 2 * newCellSize, OFFSET + newBoardPixel);
+
 		}
 
 		private void UpdateTurnButton()
@@ -132,21 +185,38 @@ namespace gameco
 			}
 			else if (bot is BotHard botHard)
 			{
-				botHard.MakeMove(boardButtons, boardPieces); // Pass both boardButtons and boardPieces
+				botHard.MakeMove(boardPieces, boardButtons);
+				; // Pass both boardButtons and boardPieces
 			}
 		}
 
 
 		private void ShowValidMoves(int x, int y)
 		{
-			List<Point> restrictedPoints = new List<Point>
+			// Đặt tất cả các ô không có quân cờ về trạng thái không hiển thị
+			for (int i = 0; i < BOARD_SIZE; i++)
 			{
-				new Point(0, 1), new Point(0, 3),
-				new Point(1, 0), new Point(1, 2), new Point(1, 4),
-				new Point(2, 1), new Point(2, 3),
-				new Point(3, 0), new Point(3, 2), new Point(3, 4),
-				new Point(4, 1), new Point(4, 3)
-			};
+				for (int j = 0; j < BOARD_SIZE; j++)
+				{
+					if (boardPieces[i, j] == null) // Nếu không có quân cờ
+					{
+						boardButtons[i, j].Visible = false;
+					}
+					else
+					{
+						boardButtons[i, j].Visible = true; // Các ô có quân cờ luôn hiển thị
+					}
+				}
+			}
+
+			List<Point> restrictedPoints = new List<Point>
+	{
+		new Point(0, 1), new Point(0, 3),
+		new Point(1, 0), new Point(1, 2), new Point(1, 4),
+		new Point(2, 1), new Point(2, 3),
+		new Point(3, 0), new Point(3, 2), new Point(3, 4),
+		new Point(4, 1), new Point(4, 3)
+	};
 
 			int[,] directionsStraight = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
 			int[,] directionsDiagonal = { { 1, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 } };
@@ -163,6 +233,8 @@ namespace gameco
 				Array.Copy(directionsStraight, 0, directions, 0, directionsStraight.Length);
 				Array.Copy(directionsDiagonal, 0, directions, directionsStraight.Length, directionsDiagonal.Length);
 			}
+
+			// Hiển thị các ô hợp lệ để di chuyển
 			for (int i = 0; i < directions.GetLength(0); i++)
 			{
 				int newX = x + directions[i, 0];
@@ -171,14 +243,22 @@ namespace gameco
 				if (IsValidMove(newX, newY))
 				{
 					boardButtons[newX, newY].BackColor = Color.LightGreen;
+					boardButtons[newX, newY].Visible = true; // Hiển thị ô hợp lệ
 				}
 			}
+
+			// Đảm bảo quân cờ được chọn vẫn hiển thị
+			boardButtons[x, y].Visible = true;
 		}
+
+
 
 		private void MovePiece(int oldX, int oldY, int newX, int newY)
 		{
 			boardButtons[newX, newY].BackColor = boardButtons[oldX, oldY].BackColor;
+			boardButtons[newX, newY].Visible = true; // Hiển thị ô mới
 			boardButtons[oldX, oldY].BackColor = Color.White;
+			boardButtons[oldX, oldY].Visible = false; // Ẩn ô cũ nếu không có quân cờ
 
 			if (boardPieces[oldX, oldY] != null)
 			{
@@ -189,10 +269,11 @@ namespace gameco
 			}
 			boardPieces[newX, newY].CaptureSurroundedPieces(boardPieces); // Kiểm tra vây quân
 			ClearHighlightedMoves();
-			// Check for win condition
 			CheckWinCondition();
-
 		}
+
+
+
 
 		private void CheckWinCondition()
 		{
@@ -271,10 +352,19 @@ namespace gameco
 					if (boardButtons[i, j].BackColor == Color.LightGreen)
 					{
 						boardButtons[i, j].BackColor = Color.White;
+						boardButtons[i, j].Visible = false; // Ẩn các ô không cần thiết
+					}
+
+					// Hiển thị lại các ô có quân cờ
+					if (boardPieces[i, j] != null)
+					{
+						boardButtons[i, j].Visible = true;
 					}
 				}
 			}
 		}
+
+
 
 		private bool IsValidMove(int x, int y)
 		{
@@ -282,21 +372,6 @@ namespace gameco
 				   boardButtons[x, y].BackColor == Color.White;
 		}
 
-		private void Button_Paint(object sender, PaintEventArgs e)
-		{
-			Button btn = sender as Button;
-			Graphics g = e.Graphics;
-			g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-			g.Clear(btn.BackColor);
-			using (Brush brush = new SolidBrush(btn.BackColor))
-			{
-				g.FillEllipse(brush, 0, 0, btn.Width, btn.Height);
-			}
-			using (Pen pen = new Pen(btn.ForeColor))
-			{
-				g.DrawEllipse(pen, 0, 0, btn.Width - 1, btn.Height - 1);
-			}
-		}
 
 		private void ResetPieces()
 		{
@@ -305,54 +380,47 @@ namespace gameco
 				for (int j = 0; j < BOARD_SIZE; j++)
 				{
 					boardButtons[i, j].BackColor = Color.White;
+					boardButtons[i, j].Visible = false; // Ẩn tất cả các ô
 					boardPieces[i, j] = null;
 				}
 			}
 
+			// Đặt lại các quân cờ và hiển thị chúng
 			for (int i = 0; i < BOARD_SIZE; i++)
 			{
 				boardButtons[i, 4].BackColor = Color.Blue;
+				boardButtons[i, 4].Visible = true;
 				boardPieces[i, 4] = new chess(i, 4, Color.Blue);
 			}
 			boardButtons[0, 3].BackColor = Color.Blue;
+			boardButtons[0, 3].Visible = true;
 			boardPieces[0, 3] = new chess(0, 3, Color.Blue);
 			boardButtons[4, 3].BackColor = Color.Blue;
+			boardButtons[4, 3].Visible = true;
 			boardPieces[4, 3] = new chess(4, 3, Color.Blue);
 			boardButtons[4, 2].BackColor = Color.Red;
+			boardButtons[4, 2].Visible = true;
 			boardPieces[4, 2] = new chess(4, 2, Color.Red);
 
 			for (int i = 0; i < BOARD_SIZE; i++)
 			{
 				boardButtons[i, 0].BackColor = Color.Red;
+				boardButtons[i, 0].Visible = true;
 				boardPieces[i, 0] = new chess(i, 0, Color.Red);
 			}
 			boardButtons[0, 1].BackColor = Color.Red;
+			boardButtons[0, 1].Visible = true;
 			boardPieces[0, 1] = new chess(0, 1, Color.Red);
 			boardButtons[4, 1].BackColor = Color.Red;
+			boardButtons[4, 1].Visible = true;
 			boardPieces[4, 1] = new chess(4, 1, Color.Red);
 			boardButtons[0, 2].BackColor = Color.Blue;
+			boardButtons[0, 2].Visible = true;
 			boardPieces[0, 2] = new chess(0, 2, Color.Blue);
 		}
 
-		private void Form1_Paint(object sender, PaintEventArgs e)
-		{
-			Graphics g = e.Graphics;
-			Pen blackPen = new Pen(Color.Black, 2);
 
-			for (int i = 0; i < BOARD_SIZE; i++)
-			{
-				g.DrawLine(blackPen, 10, 10 + i * CELL_SIZE, 10 + BOARD_PIXEL, 10 + i * CELL_SIZE);
-				g.DrawLine(blackPen, 10 + i * CELL_SIZE, 10, 10 + i * CELL_SIZE, 10 + BOARD_PIXEL);
-			}
 
-			g.DrawLine(blackPen, 10, 10, 10 + BOARD_PIXEL, 10 + BOARD_PIXEL);
-			g.DrawLine(blackPen, 10 + BOARD_PIXEL, 10, 10, 10 + BOARD_PIXEL);
-
-			g.DrawLine(blackPen, 10, 10 + 2 * CELL_SIZE, 10 + 2 * CELL_SIZE, 10);
-			g.DrawLine(blackPen, 10 + BOARD_PIXEL, 10 + 2 * CELL_SIZE, 10 + 2 * CELL_SIZE, 10);
-			g.DrawLine(blackPen, 10, 10 + 2 * CELL_SIZE, 10 + 2 * CELL_SIZE, 10 + BOARD_PIXEL);
-			g.DrawLine(blackPen, 10 + BOARD_PIXEL, 10 + 2 * CELL_SIZE, 10 + 2 * CELL_SIZE, 10 + BOARD_PIXEL);
-		}
 		private void button1_Click(object sender, EventArgs e)
 		{
 			DialogResult result = MessageBox.Show("Bạn muốn chơi lại không?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
