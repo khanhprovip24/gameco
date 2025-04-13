@@ -41,6 +41,7 @@ namespace gameco
 			Form1 form1 = new Form1(2); // 1 là mức độ Dễ
 			form1.Show();
 			this.Close(); // Cuối cùng, đóng form hiện tại
+			
 		}
 
 		private void exit_btn_Click(object sender, EventArgs e)

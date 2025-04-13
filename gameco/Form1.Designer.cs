@@ -44,6 +44,7 @@
 			this.label7 = new System.Windows.Forms.Label();
 			this.timer2 = new System.Windows.Forms.Timer(this.components);
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.mode = new System.Windows.Forms.Label();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -184,6 +185,7 @@
 			// groupBox1
 			// 
 			this.groupBox1.BackColor = System.Drawing.Color.LightGray;
+			this.groupBox1.Controls.Add(this.mode);
 			this.groupBox1.Controls.Add(this.button1);
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Controls.Add(this.label7);
@@ -204,6 +206,15 @@
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Điều khiển";
 			// 
+			// mode
+			// 
+			this.mode.AutoSize = true;
+			this.mode.Location = new System.Drawing.Point(19, 139);
+			this.mode.Name = "mode";
+			this.mode.Size = new System.Drawing.Size(140, 22);
+			this.mode.TabIndex = 14;
+			this.mode.Text = "Chế độ chơi: ";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -214,7 +225,7 @@
 			this.Controls.Add(this.groupBox1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Name = "Form1";
-			this.Text = "Form1";
+			this.Text = "Cờ gánh";
 			this.Load += new System.EventHandler(this.Form1_Load);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
@@ -238,6 +249,7 @@
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.Timer timer2;
 		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.Label mode;
 	}
 }
 

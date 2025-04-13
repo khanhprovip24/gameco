@@ -125,11 +125,46 @@ namespace gameco
 		// Kiểm tra xem một nhóm quân có bị bao vây hay không
 		private bool IsSurrounded(chess[,] board, int x, int y, Color enemyColor, bool[,] visited, List<(int, int)> region)
 		{
-			// Các hướng bao gồm cả 4 hướng ngang dọc và 4 hướng chéo
-			int[,] directions = { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 },  // ngang dọc
-                          { 1, 1 }, { 1, -1 }, { -1, -1 }, { -1, 1 } }; // chéo
+			Queue<(int, int)> queue = new Queue<(int, int)>();
+			queue.Enqueue((x, y));
+			visited[x, y] = true;
+			bool surrounded = true;
 
-			// Kiểm tra các điểm đặc biệt, chỉ có 4 hướng ngang dọc
+			while (queue.Count > 0)
+			{
+				var (cx, cy) = queue.Dequeue();
+				region.Add((cx, cy));
+
+				foreach (var (dx, dy) in GetValidDirections(cx, cy))
+				{
+					int nx = cx + dx;
+					int ny = cy + dy;
+
+					if (IsValidMove(nx, ny))
+					{
+						if (board[nx, ny] == null)
+						{
+							surrounded = false;  // Có ô trống -> không bị bao vây
+						}
+						else if (!visited[nx, ny] && board[nx, ny].Color == enemyColor)
+						{
+							visited[nx, ny] = true;
+							queue.Enqueue((nx, ny));
+						}
+					}
+				}
+			}
+
+			return surrounded;
+		}
+		private List<(int, int)> GetValidDirections(int x, int y)
+		{
+			List<(int, int)> directions = new List<(int, int)>
+	{
+		(0, 1), (1, 0), (0, -1), (-1, 0)
+	};
+
+			// Nếu không phải ô đặc biệt, thêm hướng chéo
 			List<(int, int)> specialPoints = new List<(int, int)>
 	{
 		(0, 1), (0, 3), (1, 0), (1, 2), (1, 4),
@@ -137,60 +172,17 @@ namespace gameco
 		(4, 1), (4, 3)
 	};
 
-			// Nếu điểm (x, y) là một trong các điểm đặc biệt, chỉ sử dụng các hướng ngang dọc
-			if (specialPoints.Contains((x, y)))
+			if (!specialPoints.Contains((x, y)))
 			{
-				directions = new int[,] { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } }; // chỉ có 4 hướng ngang dọc
+				directions.AddRange(new List<(int, int)>
+		{
+			(1, 1), (1, -1), (-1, 1), (-1, -1)
+		});
 			}
 
-			Queue<(int, int)> queue = new Queue<(int, int)>();
-			queue.Enqueue((x, y));
-			region.Add((x, y));
-			visited[x, y] = true;
-			bool surrounded = true;
-
-			while (queue.Count > 0)
-			{
-				var (cx, cy) = queue.Dequeue();
-
-				// Kiểm tra các quân cờ đối thủ xung quanh
-				bool hasPath = false;
-				for (int i = 0; i < directions.GetLength(0); i++)
-				{
-					int nx = cx + directions[i, 0];
-					int ny = cy + directions[i, 1];
-
-					// Kiểm tra biên để tránh vượt quá phạm vi bàn cờ
-					if (nx < 0 || nx > 4 || ny < 0 || ny > 4)
-					{
-						continue; // Không kiểm tra ngoài phạm vi bàn cờ
-					}
-
-					// Nếu có ô trống cạnh quân cờ đối thủ, có thể di chuyển, quân cờ không bị vây
-					if (board[nx, ny] == null)
-					{
-						hasPath = true;
-						break;
-					}
-
-					// Nếu là quân đối thủ chưa kiểm tra, thêm vào danh sách
-					if (!visited[nx, ny] && board[nx, ny].Color == enemyColor)
-					{
-						visited[nx, ny] = true;
-						queue.Enqueue((nx, ny));
-						region.Add((nx, ny));
-					}
-				}
-
-				// Nếu quân cờ không có lối đi hợp lệ thì sẽ bị bao vây
-				if (hasPath)
-				{
-					surrounded = false;
-				}
-			}
-
-			return surrounded;
+			return directions;
 		}
+
 
 
 		private bool IsValidMove(int x, int y)

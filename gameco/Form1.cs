@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace gameco
@@ -128,7 +129,7 @@ namespace gameco
 				timer2.Start();
 			}
 		}
-		private void Button_Click(object sender, EventArgs e)
+		private async void Button_Click(object sender, EventArgs e)
 		{
 			Button clickedButton = sender as Button;
 			Point position = (Point)clickedButton.Tag;
@@ -162,6 +163,7 @@ namespace gameco
 				// Nếu là lượt của bot, bot thực hiện nước đi
 				if (!isBlueTurn && gameMode > 0) // gameMode > 0 nghĩa là có bot
 				{
+					await Task.Delay(500); // Thêm khoảng trễ 0.5 giây trước khi bot đi
 					MakeBotMove(); // Bot thực hiện nước đi
 					isBlueTurn = !isBlueTurn; // Chuyển lượt lại cho người chơi
 					UpdateTurnButton(); // Cập nhật màu của button hiển thị lượt
@@ -171,6 +173,7 @@ namespace gameco
 				}
 			}
 		}
+
 
 
 		private void MakeBotMove()
@@ -435,14 +438,12 @@ namespace gameco
 				second1.Text = s1.ToString("D2");
 				minute2.Text = m2.ToString("D2");
 				second2.Text = s2.ToString("D2");
+				isBlueTurn = true; // Đặt lại lượt đi đầu tiên là của bên xanh
+			
+
 				turn.BackColor = Color.Blue;
 			}
-			else
-			{
-			Form2 form2 = new Form2();
-				form2.Show();
-				this.Close(); // Đóng form hiện tại
-			}
+			
 		}
 
 
@@ -459,9 +460,29 @@ namespace gameco
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
+			s1 = 0;
+			m1 = 5;
+			s2 = 0;
+			m2 = 5;
 			ResetPieces();
 			turn.BackColor = Color.Blue;
 			timer1.Start();
+			if (gameMode == 0)
+			{
+				mode.Text = "Chế độ : PVP";
+			}
+			else if (gameMode == 1)
+			{
+				mode.Text = "Chế độ : Dễ";
+			}
+			else if (gameMode == 2)
+			{
+				mode.Text = "Chế độ : Thường";
+			}
+			else if (gameMode == 3)
+			{
+				mode.Text = "Chế độ : Khó";
+			}
 		}
 		private void label1_Click(object sender, EventArgs e)
 		{
