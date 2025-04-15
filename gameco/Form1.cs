@@ -40,7 +40,7 @@ namespace gameco
 			}
 			else if (gameMode == 3)
 			{
-				bot = new BotHard(Color.Red); 
+				bot = new BotHard(Color.Red);
 			}
 		}
 
@@ -112,6 +112,7 @@ namespace gameco
 			g.DrawLine(blackPen, OFFSET + newBoardPixel, OFFSET + 2 * newCellSize, OFFSET + 2 * newCellSize, OFFSET + newBoardPixel);
 
 		}
+
 
 		private void UpdateTurnButton()
 		{
@@ -449,14 +450,20 @@ namespace gameco
 
 		private void button2_Click(object sender, EventArgs e)
 		{
-			DialogResult result = MessageBox.Show("Bạn đã thắng bạn có muốn thoát không?", "Xác nhận thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+			// Hiển thị hộp thoại xác nhận
+			DialogResult result = MessageBox.Show("Bạn có muốn thoát không?", "Xác nhận thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
 			if (result == DialogResult.Yes)
 			{
+				// Hiển thị Form2
 				Form2 form2 = new Form2();
 				form2.Show();
-				this.Close();
+
+				// Ẩn Form1 thay vì đóng
+				this.Hide();
 			}
 		}
+
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
